@@ -42,12 +42,12 @@ This document outlines the design phases, architecture implementation, and devel
 - [x] Members settings (invite form, member list, role updates)
 - [x] Billing page (plan cards, stripe portal redirect button)
 
-### Phase 7: Quality Assurance & Testing ➔ `In Progress`
-- [ ] Vitest unit testing setup (mocking Clerk and database clients)
-- [ ] Playwright E2E testing for the critical sign-up ➔ checkout flow
-- [ ] Test suites execution checks
+### Phase 7: Quality Assurance & Testing ➔ `Completed`
+- [x] Vitest unit testing setup (mocking Clerk and database clients)
+- [x] Playwright E2E testing for the critical sign-up ➔ checkout flow
+- [x] Test suites execution checks
 
-### Phase 8: CI/CD Pipeline
+### Phase 8: CI/CD Pipeline ➔ `In Progress`
 - [ ] GitHub Actions workflow configuration (`ci.yml`)
 - [ ] Automated validation on PRs (lint, typecheck, unit tests, E2E run)
 
