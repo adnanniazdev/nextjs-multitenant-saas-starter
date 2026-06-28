@@ -25,13 +25,13 @@ This document outlines the design phases, architecture implementation, and devel
 - [x] Next.js 15 Middleware subdomain parsing (`[workspace].lvh.me` rewrite)
 - [x] Auth guard logic checking Clerk session token + tenant membership
 
-### Phase 4: API Layer (Server Actions & tRPC v11) ➔ `In Progress`
-- [ ] tRPC context & workspaceProcedure middleware (auto-enforcing RLS session context)
-- [ ] Next.js Server Actions for mutations (workspace creation, invitations)
-- [ ] React 19 `useActionState` and `useOptimistic` integration
-- [ ] tRPC procedures for data loading
+### Phase 4: API Layer (Server Actions & tRPC v11) ➔ `Completed`
+- [x] tRPC context & workspaceProcedure middleware (auto-enforcing RLS session context)
+- [x] Next.js Server Actions for mutations (workspace creation, invitations)
+- [x] React 19 `useActionState` and `useOptimistic` integration
+- [x] tRPC procedures for data loading
 
-### Phase 5: Webhooks & Resilience
+### Phase 5: Webhooks & Resilience ➔ `In Progress`
 - [ ] Clerk sync webhook via `svix` (creation, updates, deletions)
 - [ ] Stripe checkout session & billing portal integration
 - [ ] Stripe webhook handler with signature validation and processed event idempotency logs
