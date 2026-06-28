@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
+import { Sidebar } from "@/components/Sidebar";
 import { db } from "@/server/db";
 import { withAdmin } from "@/server/db/rls";
 import { users, workspaceMembers, workspaces } from "@/server/db/schema";
@@ -60,6 +61,35 @@ export default async function WorkspaceLayout({
     redirect("/workspaces");
   }
 
-  // Successful tenant verification
-  return <>{children}</>;
+  // 4. Retrieve all workspaces this user is a member of for the switcher
+  const userWorkspaces = await withAdmin(async (adminDb) => {
+    return await adminDb
+      .select({
+        id: workspaces.id,
+        name: workspaces.name,
+        slug: workspaces.slug,
+      })
+      .from(workspaces)
+      .innerJoin(
+        workspaceMembers,
+        eq(workspaceMembers.workspaceId, workspaces.id),
+      )
+      .where(eq(workspaceMembers.userId, user.id));
+  });
+
+  return (
+    <div className="flex h-screen w-screen overflow-hidden bg-zinc-950 text-zinc-50">
+      <Sidebar
+        currentWorkspace={{
+          id: workspace.id,
+          name: workspace.name,
+          slug: workspace.slug,
+        }}
+        workspaces={userWorkspaces}
+      />
+      <main className="flex-1 flex flex-col h-full overflow-y-auto bg-zinc-950">
+        <div className="flex-1 p-8 max-w-7xl w-full mx-auto">{children}</div>
+      </main>
+    </div>
+  );
 }

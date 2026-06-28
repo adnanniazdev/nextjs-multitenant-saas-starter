@@ -43,7 +43,20 @@ export const billingRouter = router({
         });
       }
 
-      const returnUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/settings/billing`;
+      const getReturnUrl = () => {
+        const baseUrl =
+          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+        if (baseUrl.includes("lvh.me")) {
+          return baseUrl.replace("://", `://${ctx.workspace.slug}.`);
+        }
+        if (baseUrl.includes("localhost")) {
+          const port = baseUrl.split(":")[2] || "3000";
+          return `http://${ctx.workspace.slug}.lvh.me:${port}`;
+        }
+        return baseUrl.replace("://", `://${ctx.workspace.slug}.`);
+      };
+
+      const returnUrl = `${getReturnUrl()}/billing`;
 
       return await ctx.withTenantScope(async (tenantDb) => {
         let customerId = ctx.workspace.stripeCustomerId;
@@ -113,7 +126,20 @@ export const billingRouter = router({
       });
     }
 
-    const returnUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/settings/billing`;
+    const getReturnUrl = () => {
+      const baseUrl =
+        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      if (baseUrl.includes("lvh.me")) {
+        return baseUrl.replace("://", `://${ctx.workspace.slug}.`);
+      }
+      if (baseUrl.includes("localhost")) {
+        const port = baseUrl.split(":")[2] || "3000";
+        return `http://${ctx.workspace.slug}.lvh.me:${port}`;
+      }
+      return baseUrl.replace("://", `://${ctx.workspace.slug}.`);
+    };
+
+    const returnUrl = `${getReturnUrl()}/billing`;
 
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
