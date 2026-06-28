@@ -31,12 +31,12 @@ This document outlines the design phases, architecture implementation, and devel
 - [x] React 19 `useActionState` and `useOptimistic` integration
 - [x] tRPC procedures for data loading
 
-### Phase 5: Webhooks & Resilience ➔ `In Progress`
-- [ ] Clerk sync webhook via `svix` (creation, updates, deletions)
-- [ ] Stripe checkout session & billing portal integration
-- [ ] Stripe webhook handler with signature validation and processed event idempotency logs
+### Phase 5: Webhooks & Resilience ➔ `Completed`
+- [x] Clerk sync webhook via `svix` (creation, updates, deletions)
+- [x] Stripe checkout session & billing portal integration
+- [x] Stripe webhook handler with signature validation and processed event idempotency logs
 
-### Phase 6: Core SaaS UI (Dashboard & Settings)
+### Phase 6: Core SaaS UI (Dashboard & Settings) ➔ `In Progress`
 - [ ] Workspace switcher & layout shell
 - [ ] Main dashboard (tenant metadata, stats, action items)
 - [ ] Members settings (invite form, member list, role updates)
