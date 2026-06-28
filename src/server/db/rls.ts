@@ -20,3 +20,20 @@ export async function withTenant<T>(
     return await callback(tx as any);
   });
 }
+
+/**
+ * Executes database operations within a Postgres transaction, bypassing Row-Level Security (RLS)
+ * by setting the transaction-local session variable 'app.bypass_rls' to 'true'.
+ * Use this ONLY for administrative tasks (like routing resolution or background webhook syncs).
+ *
+ * @param callback Async function containing database queries to run with RLS bypassed
+ */
+export async function withAdmin<T>(
+  callback: (tx: typeof db) => Promise<T>,
+): Promise<T> {
+  return await db.transaction(async (tx) => {
+    await tx.execute(sql`SET LOCAL app.bypass_rls = 'true'`);
+    // biome-ignore lint/suspicious/noExplicitAny: tx must be cast to any to match query callback parameter
+    return await callback(tx as any);
+  });
+}
