@@ -14,13 +14,13 @@ This document outlines the design phases, architecture implementation, and devel
 - [x] Drizzle ORM config initialized
 - [x] Repository initialized & linked to GitHub
 
-### Phase 2: Database Schemas & Neon RLS ➔ `In Progress`
+### Phase 2: Database Schemas & Neon RLS ➔ `Completed`
 - [x] Drizzle schema definition (`users`, `workspaces`, `workspace_members`, `invitations`, `processed_webhook_events`)
-- [ ] Database connection setup with Neon Serverless driver
-- [ ] Neon/PostgreSQL Row-Level Security (RLS) policies SQL script
-- [ ] Dynamic session-variable injector for query-level security boundaries
+- [x] Database connection setup with Neon Serverless driver
+- [x] Neon/PostgreSQL Row-Level Security (RLS) policies SQL script
+- [x] Dynamic session-variable injector for query-level security boundaries
 
-### Phase 3: Subdomain Rewrite Routing & Auth
+### Phase 3: Subdomain Rewrite Routing & Auth ➔ `In Progress`
 - [ ] Clerk Authentication integration
 - [ ] Next.js 15 Middleware subdomain parsing (`[workspace].lvh.me` rewrite)
 - [ ] Auth guard logic checking Clerk session token + tenant membership

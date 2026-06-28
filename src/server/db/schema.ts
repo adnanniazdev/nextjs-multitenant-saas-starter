@@ -1,5 +1,12 @@
-import { pgTable, uuid, text, pgEnum, timestamp, primaryKey, uniqueIndex } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import {
+  pgEnum,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 
 // Enums
 export const roleEnum = pgEnum("member_role", ["owner", "admin", "member"]);
@@ -41,9 +48,7 @@ export const workspaceMembers = pgTable(
     role: roleEnum("role").notNull(),
     joinedAt: timestamp("joined_at").defaultNow().notNull(),
   },
-  (table) => [
-    primaryKey({ columns: [table.workspaceId, table.userId] }),
-  ]
+  (table) => [primaryKey({ columns: [table.workspaceId, table.userId] })],
 );
 
 // Invitations table
@@ -80,16 +85,19 @@ export const workspacesRelations = relations(workspaces, ({ many }) => ({
   invitations: many(invitations),
 }));
 
-export const workspaceMembersRelations = relations(workspaceMembers, ({ one }) => ({
-  workspace: one(workspaces, {
-    fields: [workspaceMembers.workspaceId],
-    references: [workspaces.id],
+export const workspaceMembersRelations = relations(
+  workspaceMembers,
+  ({ one }) => ({
+    workspace: one(workspaces, {
+      fields: [workspaceMembers.workspaceId],
+      references: [workspaces.id],
+    }),
+    user: one(users, {
+      fields: [workspaceMembers.userId],
+      references: [users.id],
+    }),
   }),
-  user: one(users, {
-    fields: [workspaceMembers.userId],
-    references: [users.id],
-  }),
-}));
+);
 
 export const invitationsRelations = relations(invitations, ({ one }) => ({
   workspace: one(workspaces, {
