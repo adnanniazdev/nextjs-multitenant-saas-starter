@@ -20,12 +20,12 @@ This document outlines the design phases, architecture implementation, and devel
 - [x] Neon/PostgreSQL Row-Level Security (RLS) policies SQL script
 - [x] Dynamic session-variable injector for query-level security boundaries
 
-### Phase 3: Subdomain Rewrite Routing & Auth ➔ `In Progress`
-- [ ] Clerk Authentication integration
-- [ ] Next.js 15 Middleware subdomain parsing (`[workspace].lvh.me` rewrite)
-- [ ] Auth guard logic checking Clerk session token + tenant membership
+### Phase 3: Subdomain Rewrite Routing & Auth ➔ `Completed`
+- [x] Clerk Authentication integration
+- [x] Next.js 15 Middleware subdomain parsing (`[workspace].lvh.me` rewrite)
+- [x] Auth guard logic checking Clerk session token + tenant membership
 
-### Phase 4: API Layer (Server Actions & tRPC v11)
+### Phase 4: API Layer (Server Actions & tRPC v11) ➔ `In Progress`
 - [ ] tRPC context & workspaceProcedure middleware (auto-enforcing RLS session context)
 - [ ] Next.js Server Actions for mutations (workspace creation, invitations)
 - [ ] React 19 `useActionState` and `useOptimistic` integration
