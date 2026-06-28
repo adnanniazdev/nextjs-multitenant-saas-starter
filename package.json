@@ -1,0 +1,47 @@
+{
+  "name": "multi-tenant-saas",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "biome check",
+    "format": "biome format --write"
+  },
+  "dependencies": {
+    "@clerk/nextjs": "^7.5.9",
+    "@neondatabase/serverless": "^1.1.0",
+    "@t3-oss/env-nextjs": "^0.13.11",
+    "@tanstack/react-query": "^5.101.2",
+    "@trpc/client": "^11.13.0",
+    "@trpc/next": "^11.13.0",
+    "@trpc/react-query": "^11.13.0",
+    "@trpc/server": "^11.13.0",
+    "drizzle-orm": "^0.45.2",
+    "next": "16.2.9",
+    "pg": "^8.22.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "stripe": "^22.3.0",
+    "svix": "^1.96.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.2.0",
+    "@playwright/test": "^1.61.1",
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^20",
+    "@types/pg": "^8.20.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.10",
+    "jsdom": "^29.1.1",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vitest": "^4.1.9"
+  }
+}
