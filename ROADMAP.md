@@ -36,13 +36,13 @@ This document outlines the design phases, architecture implementation, and devel
 - [x] Stripe checkout session & billing portal integration
 - [x] Stripe webhook handler with signature validation and processed event idempotency logs
 
-### Phase 6: Core SaaS UI (Dashboard & Settings) ➔ `In Progress`
-- [ ] Workspace switcher & layout shell
-- [ ] Main dashboard (tenant metadata, stats, action items)
-- [ ] Members settings (invite form, member list, role updates)
-- [ ] Billing page (plan cards, stripe portal redirect button)
+### Phase 6: Core SaaS UI (Dashboard & Settings) ➔ `Completed`
+- [x] Workspace switcher & layout shell
+- [x] Main dashboard (tenant metadata, stats, action items)
+- [x] Members settings (invite form, member list, role updates)
+- [x] Billing page (plan cards, stripe portal redirect button)
 
-### Phase 7: Quality Assurance & Testing
+### Phase 7: Quality Assurance & Testing ➔ `In Progress`
 - [ ] Vitest unit testing setup (mocking Clerk and database clients)
 - [ ] Playwright E2E testing for the critical sign-up ➔ checkout flow
 - [ ] Test suites execution checks
