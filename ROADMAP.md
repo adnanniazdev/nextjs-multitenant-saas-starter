@@ -47,9 +47,9 @@ This document outlines the design phases, architecture implementation, and devel
 - [x] Playwright E2E testing for the critical sign-up ➔ checkout flow
 - [x] Test suites execution checks
 
-### Phase 8: CI/CD Pipeline ➔ `In Progress`
-- [ ] GitHub Actions workflow configuration (`ci.yml`)
-- [ ] Automated validation on PRs (lint, typecheck, unit tests, E2E run)
+### Phase 8: CI/CD Pipeline ➔ `Completed`
+- [x] GitHub Actions workflow configuration (`ci.yml`)
+- [x] Automated validation on PRs (lint, typecheck, unit tests, E2E run)
 
 ---
 
