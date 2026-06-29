@@ -108,6 +108,70 @@ export const billingRouter = router({
       });
     }),
 
+  // Mutation: Create Stripe Subscription Intent (Owner-only)
+  createSubscriptionIntent: workspaceProcedure
+    .input(z.object({ priceId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.role !== "owner") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only workspace owners can manage subscriptions.",
+        });
+      }
+
+      return await ctx.withTenantScope(async (tenantDb) => {
+        let customerId = ctx.workspace.stripeCustomerId;
+
+        // 1. Create Stripe Customer if not existing
+        if (!customerId) {
+          const customer = await stripe.customers.create({
+            email: ctx.user.email,
+            name: ctx.workspace.name,
+            metadata: {
+              workspaceId: ctx.workspace.id,
+            },
+          });
+          customerId = customer.id;
+
+          // Save customer ID
+          await tenantDb
+            .update(workspaces)
+            .set({ stripeCustomerId: customerId })
+            .where(eq(workspaces.id, ctx.workspace.id));
+        }
+
+        // 2. Create Subscription with default_incomplete payment behavior
+        const subscription = await stripe.subscriptions.create({
+          customer: customerId,
+          items: [{ price: input.priceId }],
+          payment_behavior: "default_incomplete",
+          payment_settings: { save_default_payment_method: "on_subscription" },
+          expand: ["latest_invoice.payment_intent"],
+          metadata: {
+            workspaceId: ctx.workspace.id,
+          },
+        });
+
+        // 3. Extract client secret
+        // biome-ignore lint/suspicious/noExplicitAny: Stripe invoice is cast to access expanded payment intent fields
+        const invoice = subscription.latest_invoice as any;
+        // biome-ignore lint/suspicious/noExplicitAny: Stripe payment intent is cast to access client_secret field
+        const paymentIntent = invoice?.payment_intent as any;
+
+        if (!paymentIntent || !paymentIntent.client_secret) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to generate payment intent client secret.",
+          });
+        }
+
+        return {
+          subscriptionId: subscription.id,
+          clientSecret: paymentIntent.client_secret,
+        };
+      });
+    }),
+
   // Mutation: Create Stripe Customer Portal (Owner-only)
   createPortal: workspaceProcedure.mutation(async ({ ctx }) => {
     if (ctx.role !== "owner") {

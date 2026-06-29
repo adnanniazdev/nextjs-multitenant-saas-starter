@@ -5,9 +5,9 @@ import { auth } from "@clerk/nextjs/server";
 import { and, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { db } from "../db";
 import { withAdmin, withTenant } from "../db/rls";
 import { invitations, users, workspaceMembers, workspaces } from "../db/schema";
+import { getOrCreateUser } from "../db/users";
 
 // Form Validation Schemas
 const CreateWorkspaceSchema = z.object({
@@ -52,13 +52,13 @@ export async function createWorkspace(
 
   const data = CreateWorkspaceSchema.parse(rawData);
 
-  // 1. Resolve internal user ID
-  const user = await db.query.users.findFirst({
-    where: eq(users.clerkId, clerkUserId),
-  });
+  // 1. Resolve internal user ID (utilizing JIT provisioning fallback)
+  const user = await getOrCreateUser(clerkUserId);
 
   if (!user) {
-    throw new Error("User profile not found in database.");
+    throw new Error(
+      "User profile not found in database and JIT provisioning failed.",
+    );
   }
 
   // 2. Run transaction bypassing RLS (since workspace doesn't exist yet)

@@ -1,5 +1,7 @@
 "use client";
 
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 import {
   Check,
   CreditCard,
@@ -9,6 +11,12 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { trpc } from "@/lib/trpc/client";
+import { PaymentForm } from "./PaymentForm";
+
+// Initialize Stripe client-side SDK. Fallbacks gracefully if key is not yet set in .env
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "",
+);
 
 interface BillingClientProps {
   workspace: {
@@ -23,26 +31,31 @@ interface BillingClientProps {
 
 export function BillingClient({ workspace }: BillingClientProps) {
   const [loading, setLoading] = useState(false);
-  const checkoutMutation = trpc.billing.createCheckout.useMutation();
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+
+  const subscriptionIntentMutation =
+    trpc.billing.createSubscriptionIntent.useMutation();
   const portalMutation = trpc.billing.createPortal.useMutation();
 
   const handleUpgrade = async () => {
     setLoading(true);
     try {
-      // Create checkout session redirecting to Stripe
-      const res = await checkoutMutation.mutateAsync({
+      const res = await subscriptionIntentMutation.mutateAsync({
         workspaceSlug: workspace.slug,
-        priceId: "price_pro_tier_mock",
+        priceId:
+          process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || "price_pro_tier_mock",
       });
-      if (res.url) {
-        window.location.href = res.url;
+
+      if (res.clientSecret) {
+        setClientSecret(res.clientSecret);
       }
     } catch (err) {
       const message =
         err instanceof Error
           ? err.message
-          : "Failed to initiate Stripe checkout";
+          : "Failed to initiate Stripe elements checkout";
       alert(message);
+    } finally {
       setLoading(false);
     }
   };
@@ -87,7 +100,7 @@ export function BillingClient({ workspace }: BillingClientProps) {
             )}
           </div>
           {workspace.plan === "pro" && workspace.currentPeriodEnd && (
-            <p className="text-xs text-zinc-550 pt-1">
+            <p className="text-xs text-zinc-500 pt-1">
               Your subscription renews/ends on:{" "}
               <span className="text-zinc-400 font-medium">
                 {new Date(workspace.currentPeriodEnd).toLocaleDateString()}
@@ -138,7 +151,7 @@ export function BillingClient({ workspace }: BillingClientProps) {
       {/* Plan comparisons table card */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Free Plan Card */}
-        <article className="p-6 bg-zinc-900/60 border border-zinc-850 rounded-xl flex flex-col justify-between h-96 relative">
+        <article className="p-6 bg-zinc-900/60 border border-zinc-800 rounded-xl flex flex-col justify-between h-96 relative">
           <div>
             <span className="text-sm font-semibold text-zinc-500 uppercase tracking-wider">
               Free Plan
@@ -147,7 +160,7 @@ export function BillingClient({ workspace }: BillingClientProps) {
               <span className="text-4xl font-extrabold text-zinc-100 tracking-tight">
                 $0
               </span>
-              <span className="text-sm text-zinc-550">/ month</span>
+              <span className="text-sm text-zinc-500">/ month</span>
             </div>
             <p className="text-sm text-zinc-450 mt-4 leading-relaxed">
               Standard shared computing resources, perfect for testing, early
@@ -165,7 +178,7 @@ export function BillingClient({ workspace }: BillingClientProps) {
                   key={feature}
                   className="flex items-start gap-2 text-sm text-zinc-400"
                 >
-                  <Check className="w-4 h-4 text-zinc-650 shrink-0 mt-0.5" />
+                  <Check className="w-4 h-4 text-zinc-600 shrink-0 mt-0.5" />
                   <span>{feature}</span>
                 </li>
               ))}
@@ -174,7 +187,7 @@ export function BillingClient({ workspace }: BillingClientProps) {
           <button
             type="button"
             disabled
-            className="w-full mt-6 py-2.5 bg-zinc-800 text-zinc-500 text-sm font-semibold rounded-lg border border-zinc-850 cursor-not-allowed"
+            className="w-full mt-6 py-2.5 bg-zinc-800 text-zinc-500 text-sm font-semibold rounded-lg border border-zinc-800 cursor-not-allowed"
           >
             {workspace.plan === "free"
               ? "Currently Subscribed"
@@ -200,7 +213,7 @@ export function BillingClient({ workspace }: BillingClientProps) {
               <span className="text-4xl font-extrabold text-zinc-100 tracking-tight">
                 $29
               </span>
-              <span className="text-sm text-zinc-550">/ month</span>
+              <span className="text-sm text-zinc-500">/ month</span>
             </div>
             <p className="text-sm text-zinc-450 mt-4 leading-relaxed">
               For professional portfolios and production applications. Full
@@ -231,7 +244,7 @@ export function BillingClient({ workspace }: BillingClientProps) {
               type="button"
               disabled={loading}
               onClick={handleManagePortal}
-              className="w-full mt-6 py-2.5 bg-zinc-850 hover:bg-zinc-800 transition-colors text-zinc-250 text-sm font-semibold rounded-lg border border-zinc-800 flex items-center justify-center gap-1.5 focus:outline-none"
+              className="w-full mt-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 transition-colors text-zinc-200 text-sm font-semibold rounded-lg border border-zinc-750 flex items-center justify-center gap-1.5 focus:outline-none"
             >
               Manage Subscription
               <ExternalLink className="w-3.5 h-3.5 text-zinc-500" />
@@ -249,6 +262,39 @@ export function BillingClient({ workspace }: BillingClientProps) {
           )}
         </article>
       </div>
+
+      {/* Embedded Elements Modal Overlay */}
+      {clientSecret && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-xl w-full max-w-md shadow-2xl relative animate-in fade-in zoom-in duration-200 text-zinc-100 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold text-zinc-100 font-sans mb-1">
+              Complete Upgrade
+            </h2>
+            <p className="text-sm text-zinc-400 mb-6">
+              Enter your card details to upgrade{" "}
+              <strong>{workspace.name}</strong> to the Pro plan.
+            </p>
+            <Elements
+              stripe={stripePromise}
+              options={{
+                clientSecret,
+                appearance: {
+                  theme: "night",
+                  variables: {
+                    colorPrimary: "#f59e0b",
+                    colorBackground: "#09090b",
+                    colorText: "#f4f4f5",
+                    colorDanger: "#ef4444",
+                    fontFamily: "Inter, system-ui, sans-serif",
+                  },
+                },
+              }}
+            >
+              <PaymentForm onCancel={() => setClientSecret(null)} />
+            </Elements>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

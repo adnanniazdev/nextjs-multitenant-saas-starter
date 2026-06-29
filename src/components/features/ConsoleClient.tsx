@@ -135,7 +135,7 @@ export function ConsoleClient({
             Sign in to create a workspace and experience isolated tenant
             environments.
           </p>
-          <SignInButton mode="modal">
+          <SignInButton>
             <button
               type="button"
               className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-zinc-950 font-bold rounded-lg transition-colors flex items-center justify-center gap-2 focus:outline-none"

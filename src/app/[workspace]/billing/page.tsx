@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { withAdmin } from "@/server/db/rls";
 import { workspaces } from "@/server/db/schema";
+import { stripe } from "@/server/stripe";
 import { BillingClient } from "./BillingClient";
 
 interface BillingPageProps {
@@ -29,6 +30,62 @@ export default async function WorkspaceBillingPage({
 
   if (!workspace) {
     notFound();
+  }
+
+  // JIT Sync Fallback: Proactively sync subscription details from Stripe SDK
+  // This allows instant billing state updates during local testing without relying on webhooks
+  if (workspace.stripeCustomerId) {
+    try {
+      const activeSubscriptions = await stripe.subscriptions.list({
+        customer: workspace.stripeCustomerId,
+        limit: 1,
+      });
+
+      const activeSub = activeSubscriptions.data[0];
+
+      if (activeSub) {
+        const isPro =
+          activeSub.status === "active" || activeSub.status === "trialing";
+        // Stripe 2025-03-31 API tracking: renewal period is nested under items.data[0]
+        const currentPeriodEnd = new Date(
+          activeSub.items.data[0].current_period_end * 1000,
+        );
+
+        await withAdmin(async (adminDb) => {
+          await adminDb
+            .update(workspaces)
+            .set({
+              plan: isPro ? "pro" : "free",
+              subscriptionStatus: activeSub.status,
+              currentPeriodEnd,
+            })
+            .where(eq(workspaces.id, workspace.id));
+        });
+
+        // Mutate local object to pass updated states to UI
+        workspace.plan = isPro ? "pro" : "free";
+        workspace.subscriptionStatus = activeSub.status;
+        workspace.currentPeriodEnd = currentPeriodEnd;
+      } else {
+        // Reset to free tier if no active subscription is found
+        await withAdmin(async (adminDb) => {
+          await adminDb
+            .update(workspaces)
+            .set({
+              plan: "free",
+              subscriptionStatus: null,
+              currentPeriodEnd: null,
+            })
+            .where(eq(workspaces.id, workspace.id));
+        });
+
+        workspace.plan = "free";
+        workspace.subscriptionStatus = null;
+        workspace.currentPeriodEnd = null;
+      }
+    } catch (err) {
+      console.error("Failed to execute JIT Stripe subscription sync:", err);
+    }
   }
 
   return (

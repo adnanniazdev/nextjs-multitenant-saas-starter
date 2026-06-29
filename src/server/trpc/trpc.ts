@@ -87,7 +87,7 @@ export const workspaceProcedure = authedProcedure
     ): Promise<T> => {
       return await ctx.db.transaction(async (tx) => {
         await tx.execute(
-          sql`SET LOCAL app.current_tenant_id = ${workspace.id}::uuid`,
+          sql`SELECT set_config('app.current_tenant_id', ${workspace.id}, true)`,
         );
         // biome-ignore lint/suspicious/noExplicitAny: tx must be cast to any to match query callback parameter
         return await callback(tx as any);

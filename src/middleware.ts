@@ -55,7 +55,15 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   // 2. Route Protection
-  if (!isPublicRoute(req)) {
+  const isSubdomain = subdomain && subdomain !== "";
+  // Subdomain routes (e.g. acme.lvh.me/) must be private, except for webhook APIs or invitation acceptance
+  const isSubdomainPublic =
+    isSubdomain &&
+    (url.pathname.startsWith("/api") || url.pathname.startsWith("/invite"));
+
+  if (isSubdomain && !isSubdomainPublic) {
+    await auth.protect();
+  } else if (!isSubdomain && !isPublicRoute(req)) {
     await auth.protect();
   }
 

@@ -50,20 +50,24 @@ export function Sidebar({ currentWorkspace, workspaces }: SidebarProps) {
     window.location.href = targetUrl;
   };
 
+  const pathPrefix = pathname.startsWith(`/${currentWorkspace.slug}`)
+    ? `/${currentWorkspace.slug}`
+    : "";
+
   const navItems = [
     {
       name: "Dashboard",
-      href: `/`,
+      href: `${pathPrefix}/`,
       icon: LayoutDashboard,
     },
     {
       name: "Team Members",
-      href: `/members`,
+      href: `${pathPrefix}/members`,
       icon: Users,
     },
     {
       name: "Billing Settings",
-      href: `/billing`,
+      href: `${pathPrefix}/billing`,
       icon: CreditCard,
     },
   ];
@@ -146,12 +150,13 @@ export function Sidebar({ currentWorkspace, workspaces }: SidebarProps) {
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1.5">
         {navItems.map((item) => {
-          // In subdomains, the pathname doesn't contain [workspace] slug in client environment
-          // because it has been rewritten internally. E.g., tenant.lvh.me/billing has client pathname "/billing"
+          const hrefNormalized = item.href.replace(/\/$/, "");
+          const pathnameNormalized = pathname.replace(/\/$/, "");
+          // Check active state (if dashboard root matching or prefix matching)
           const isActive =
-            item.href === "/"
-              ? pathname === "/"
-              : pathname.startsWith(item.href);
+            hrefNormalized === pathPrefix
+              ? pathnameNormalized === pathPrefix
+              : pathnameNormalized.startsWith(hrefNormalized);
 
           return (
             <Link

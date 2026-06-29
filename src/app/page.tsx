@@ -2,7 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { ConsoleClient } from "@/components/features/ConsoleClient";
 import { withAdmin } from "@/server/db/rls";
-import { users, workspaceMembers, workspaces } from "@/server/db/schema";
+import { workspaceMembers, workspaces } from "@/server/db/schema";
+import { getOrCreateUser } from "@/server/db/users";
 
 export default async function Home() {
   const { userId: clerkUserId } = await auth();
@@ -15,12 +16,8 @@ export default async function Home() {
     );
   }
 
-  // 1. Resolve user profile in DB bypassing RLS (metadata check)
-  const user = await withAdmin(async (adminDb) => {
-    return await adminDb.query.users.findFirst({
-      where: eq(users.clerkId, clerkUserId),
-    });
-  });
+  // 1. Resolve or provision user profile dynamically (JIT fallback)
+  const user = await getOrCreateUser(clerkUserId);
 
   if (!user) {
     // If webhook hasn't written user record yet, treat as empty list

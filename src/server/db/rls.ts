@@ -14,8 +14,11 @@ export async function withTenant<T>(
 ): Promise<T> {
   return await db.transaction(async (tx) => {
     // Inject the current tenant ID into the transaction context.
-    // SET LOCAL is scoped strictly to the transaction block, preventing data leakage across pooled connections.
-    await tx.execute(sql`SET LOCAL app.current_tenant_id = ${tenantId}::uuid`);
+    // We use the built-in 'set_config' function instead of the 'SET LOCAL' utility command.
+    // This allows parameter binding and is compatible with PgBouncer transaction pooling.
+    await tx.execute(
+      sql`SELECT set_config('app.current_tenant_id', ${tenantId}, true)`,
+    );
     // biome-ignore lint/suspicious/noExplicitAny: tx must be cast to any to match query callback parameter
     return await callback(tx as any);
   });
@@ -32,7 +35,8 @@ export async function withAdmin<T>(
   callback: (tx: typeof db) => Promise<T>,
 ): Promise<T> {
   return await db.transaction(async (tx) => {
-    await tx.execute(sql`SET LOCAL app.bypass_rls = 'true'`);
+    // Enable RLS bypass in the current transaction scope.
+    await tx.execute(sql`SELECT set_config('app.bypass_rls', 'true', true)`);
     // biome-ignore lint/suspicious/noExplicitAny: tx must be cast to any to match query callback parameter
     return await callback(tx as any);
   });
